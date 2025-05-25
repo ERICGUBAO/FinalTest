@@ -2,4 +2,10 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="today_background">#FF4081</color>
+    <color name="today_text">#FFFFFF</color>
+    <color name="current_month_background">#FFFFFF</color>
+    <color name="current_month_text">#000000</color>
+    <color name="other_month_background">#F5F5F5</color>
+    <color name="other_month_text">#AAAAAA</color>
 </resources>
