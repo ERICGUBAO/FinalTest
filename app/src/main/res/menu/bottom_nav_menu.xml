@@ -2,18 +2,18 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/home"
-        android:icon="@android:drawable/ic_menu_home"
-        android:title="主页"/>
+        android:title="主页"
+        android:icon="@drawable/ic_home"/>
     <item
         android:id="@+id/schedule"
-        android:icon="@android:drawable/ic_menu_day"
-        android:title="日程"/>
+        android:title="日程"
+        android:icon="@drawable/ic_schedule"/>
     <item
         android:id="@+id/course"
-        android:icon="@android:drawable/ic_menu_agenda"
-        android:title="课程表"/>
+        android:title="课程表"
+        android:icon="@drawable/ic_course"/>
     <item
         android:id="@+id/settings"
-        android:icon="@android:drawable/ic_menu_preferences"
-        android:title="设置"/>
+        android:title="设置"
+        android:icon="@drawable/ic_settings"/>
 </menu>
