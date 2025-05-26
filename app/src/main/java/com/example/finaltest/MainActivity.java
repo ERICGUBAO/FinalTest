@@ -2,7 +2,7 @@ package com.example.finaltest;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
-
+import android.widget.CheckBox;
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.view.View;

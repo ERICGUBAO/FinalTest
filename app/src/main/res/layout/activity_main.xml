@@ -32,18 +32,19 @@
     </LinearLayout>
 
     <!-- 日历网格 -->
+
+    <!-- 分隔线 -->
     <GridView
         android:id="@+id/calendar_grid"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:numColumns="7"
-        android:verticalSpacing="1dp"
-        android:horizontalSpacing="1dp"
-        android:stretchMode="columnWidth"
         android:gravity="center"
-        android:padding="8dp"/>
+        android:horizontalSpacing="1dp"
+        android:numColumns="7"
+        android:padding="8dp"
+        android:stretchMode="columnWidth"
+        android:verticalSpacing="1dp" />
 
-    <!-- 分隔线 -->
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
@@ -67,6 +68,12 @@
         android:layout_weight="1"
         android:divider="#E0E0E0"
         android:dividerHeight="1dp"/>
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tab_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:tabMode="fixed"
+        app:tabGravity="fill"/>
 
     <!-- 底部导航栏 -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
@@ -77,5 +84,6 @@
         app:itemIconTint="@drawable/nav_item_color"
         app:itemTextColor="@drawable/nav_item_color"
         android:background="@android:color/white"/>
+
 
 </LinearLayout>
