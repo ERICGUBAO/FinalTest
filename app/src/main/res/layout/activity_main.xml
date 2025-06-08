@@ -218,7 +218,7 @@
             android:dividerHeight="1dp"
             android:paddingBottom="8dp"/>
 
-        <!-- 底部导航栏 -->
+        <!-- 仅修改底部导航栏部分 -->
         <com.google.android.material.bottomnavigation.BottomNavigationView
             android:id="@+id/bottom_nav"
             android:layout_width="match_parent"
@@ -229,6 +229,7 @@
             app:itemIconTint="@drawable/nav_item_color"
             app:itemTextColor="@drawable/nav_item_color"
             app:labelVisibilityMode="labeled"
-            app:menu="@menu/bottom_nav_menu" />
+            app:menu="@menu/bottom_nav_menu"
+            app:layout_constraintBottom_toBottomOf="parent"/>
     </LinearLayout>
 </ScrollView>

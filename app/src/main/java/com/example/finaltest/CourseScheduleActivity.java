@@ -19,8 +19,8 @@ public class CourseScheduleActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private CourseScheduleAdapter adapter;
     private List<CourseItem> courseItems = new ArrayList<>();
-    private static final int DAYS_IN_WEEK = 7; // 一周7天
-    private static final int PERIODS_PER_DAY = 12; // 每天12节课
+    private static final int DAYS_IN_WEEK = 7;
+    private static final int PERIODS_PER_DAY = 12;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,11 +28,18 @@ public class CourseScheduleActivity extends AppCompatActivity {
         setContentView(R.layout.activity_course_schedule);
 
         recyclerView = findViewById(R.id.course_recycler_view);
-        // 使用GridLayoutManager实现7列网格（时间列+7天）
         GridLayoutManager layoutManager = new GridLayoutManager(this, 8);
         recyclerView.setLayoutManager(layoutManager);
 
-        initCourseData();
+        // 从保存的状态恢复课程（实际应用中应使用数据库）
+        if (savedInstanceState != null) {
+            courseItems = savedInstanceState.getParcelableArrayList("courseItems");
+        }
+
+        if (courseItems == null || courseItems.isEmpty()) {
+            initCourseData();
+        }
+
         sortCourseItems();
         adapter = new CourseScheduleAdapter(courseItems, this);
         recyclerView.setAdapter(adapter);
@@ -41,36 +48,39 @@ public class CourseScheduleActivity extends AppCompatActivity {
         fab.setOnClickListener(v -> showAddCourseDialog());
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelableArrayList("courseItems", new ArrayList<>(courseItems));
+    }
+
     private void initCourseData() {
-        courseItems.add(new CourseItem("数学", "张老师", "A101", "周一 8:00-9:30", 0xFF4285F4));
-        courseItems.add(new CourseItem("英语", "李老师", "B205", "周二 10:00-11:30", 0xFFEA4335));
-        courseItems.add(new CourseItem("物理", "王老师", "C302", "周三 13:00-14:30", 0xFFFBBC05));
+
     }
 
     private void showAddCourseDialog() {
-        // 实现添加课程对话框（需自行补充）
+        AddCourseDialog dialog = new AddCourseDialog(this, newCourse -> {
+            courseItems.add(newCourse);
+            sortCourseItems();
+            adapter.notifyDataSetChanged();
+        });
+        dialog.show();
     }
 
     public void sortCourseItems() {
-        Collections.sort(courseItems, new Comparator<CourseItem>() {
-            @Override
-            public int compare(CourseItem o1, CourseItem o2) {
-                return parseTimeToOrder(o1.time) - parseTimeToOrder(o2.time);
-            }
-        });
+        Collections.sort(courseItems, (o1, o2) ->
+                parseTimeToOrder(o1.time) - parseTimeToOrder(o2.time));
     }
 
-    // 将时间解析为排序序号（例如：周一第1节=1，周二第3节=10）
     private int parseTimeToOrder(String time) {
         String[] parts = time.split("\\s+");
         if (parts.length < 2) return 0;
         String day = parts[0];
-        String periodStr = parts[1].replaceAll("[^0-9:-]", ""); // 提取数字和符号
+        String periodStr = parts[1].replaceAll("[^0-9:-]", "");
         int dayOrder = getDayOrder(day);
         if (dayOrder == -1) return 0;
-        // 解析时间段（如8:00-9:30转换为起始节数，假设每节课90分钟）
         int startHour = Integer.parseInt(periodStr.split("-")[0].split(":")[0]);
-        return dayOrder * PERIODS_PER_DAY + (startHour - 8); // 假设8点开始第1节课
+        return dayOrder * PERIODS_PER_DAY + (startHour - 8);
     }
 
     private int getDayOrder(String day) {
@@ -98,5 +108,4 @@ public class CourseScheduleActivity extends AppCompatActivity {
                 .setNegativeButton("取消", null)
                 .show();
     }
-
 }

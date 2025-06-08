@@ -1,6 +1,9 @@
 package com.example.finaltest;
 
-public class CourseItem {
+import android.os.Parcel;
+import android.os.Parcelable;
+
+public class CourseItem implements Parcelable {
     public String courseName;
     public String teacher;
     public String classroom;
@@ -15,16 +18,37 @@ public class CourseItem {
         this.color = color;
     }
 
+    protected CourseItem(Parcel in) {
+        courseName = in.readString();
+        teacher = in.readString();
+        classroom = in.readString();
+        time = in.readString();
+        color = in.readInt();
+    }
 
-    // 可选：添加toString方法便于调试
+    public static final Creator<CourseItem> CREATOR = new Creator<CourseItem>() {
+        @Override
+        public CourseItem createFromParcel(Parcel in) {
+            return new CourseItem(in);
+        }
+
+        @Override
+        public CourseItem[] newArray(int size) {
+            return new CourseItem[size];
+        }
+    };
+
     @Override
-    public String toString() {
-        return "CourseItem{" +
-                "courseName='" + courseName + '\'' +
-                ", teacher='" + teacher + '\'' +
-                ", classroom='" + classroom + '\'' +
-                ", time='" + time + '\'' +
-                ", color=" + color +
-                '}';
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(courseName);
+        dest.writeString(teacher);
+        dest.writeString(classroom);
+        dest.writeString(time);
+        dest.writeInt(color);
     }
 }
