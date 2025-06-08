@@ -1,0 +1,19 @@
+<resources>
+    <string-array name="days_of_week">
+        <item>周一</item>
+        <item>周二</item>
+        <item>周三</item>
+        <item>周四</item>
+        <item>周五</item>
+        <item>周六</item>
+        <item>周日</item>
+    </string-array>
+
+    <string-array name="class_times">
+        <item>8:00-9:30</item>
+        <item>10:00-11:30</item>
+        <item>13:00-14:30</item>
+        <item>15:00-16:30</item>
+        <item>18:00-19:30</item>
+    </string-array>
+</resources>

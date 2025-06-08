@@ -1,0 +1,8 @@
+<resources>
+    <!-- 日历单元格尺寸 -->
+    <dimen name="calendar_cell_size">48dp</dimen>
+    <dimen name="calendar_cell_height">48dp</dimen>
+
+    <!-- 间距 -->
+    <dimen name="calendar_spacing">1dp</dimen>
+</resources>

@@ -1,200 +1,234 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="@android:color/white"
-    android:paddingBottom="8dp">
+    android:layout_height="match_parent">
 
-    <!-- 顶部日期和月份导航 -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp"
-        android:background="@color/current_month_background">
+        android:background="@android:color/white"
+        android:paddingBottom="8dp">
 
-        <!-- 月份导航栏 -->
+        <!-- 顶部导航栏 -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_marginBottom="8dp">
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:background="@color/current_month_background">
 
-            <ImageButton
-                android:id="@+id/btn_prev_month"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:src="@drawable/ic_arrow_left"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="上一月"
-                tools:ignore="ContentDescription" />
-
+            <!-- 年份显示 -->
             <TextView
-                android:id="@+id/month_year_text"
-                android:layout_width="0dp"
+                android:id="@+id/year_text"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:gravity="center"
                 android:textColor="@color/current_month_text"
-                android:textSize="18sp"
+                android:textSize="20sp"
                 android:textStyle="bold"
-                tools:text="2023年5月" />
+                tools:text="2023年"/>
 
-            <ImageButton
-                android:id="@+id/btn_next_month"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:src="@drawable/ic_arrow_right"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="下一月"
-                tools:ignore="ContentDescription" />
+            <!-- 月份导航 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginTop="8dp">
+
+                <ImageButton
+                    android:id="@+id/btn_prev_year"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="上一年"
+                    android:src="@drawable/ic_double_arrow_left"
+                    tools:ignore="TouchTargetSizeCheck" />
+
+                <ImageButton
+                    android:id="@+id/btn_prev_month"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_marginStart="8dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="上一月"
+                    android:src="@drawable/ic_arrow_left"
+                    tools:ignore="TouchTargetSizeCheck" />
+
+                <TextView
+                    android:id="@+id/month_text"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:textColor="@color/current_month_text"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    tools:text="5月"/>
+
+                <ImageButton
+                    android:id="@+id/btn_next_month"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_marginEnd="8dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="下一月"
+                    android:src="@drawable/ic_arrow_right"
+                    tools:ignore="TouchTargetSizeCheck" />
+
+                <ImageButton
+                    android:id="@+id/btn_next_year"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="下一年"
+                    android:src="@drawable/ic_double_arrow_right"
+                    tools:ignore="TouchTargetSizeCheck" />
+            </LinearLayout>
+
+            <!-- 当前日期 -->
+            <TextView
+                android:id="@+id/current_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="8dp"
+                android:textColor="@color/current_month_text"
+                android:textSize="16sp"
+                tools:text="5月31日 周三"/>
         </LinearLayout>
 
-        <!-- 当前日期显示 -->
-        <TextView
-            android:id="@+id/current_date"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="@color/current_month_text"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            tools:text="5月31日 周三" />
+        <!-- 星期栏 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/calendar_cell_height"
+            android:orientation="horizontal"
+            android:background="#F5F5F5">
 
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="日"
+                android:gravity="center"
+                android:textColor="#616161"
+                android:textSize="12sp"
+                android:textStyle="bold"/>
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="一"
+                android:gravity="center"
+                android:textColor="#616161"
+                android:textSize="12sp"
+                android:textStyle="bold"/>
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="二"
+                android:gravity="center"
+                android:textColor="#616161"
+                android:textSize="12sp"
+                android:textStyle="bold"/>
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="三"
+                android:gravity="center"
+                android:textColor="#616161"
+                android:textSize="12sp"
+                android:textStyle="bold"/>
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="四"
+                android:gravity="center"
+                android:textColor="#616161"
+                android:textSize="12sp"
+                android:textStyle="bold"/>
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="五"
+                android:gravity="center"
+                android:textColor="#616161"
+                android:textSize="12sp"
+                android:textStyle="bold"/>
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="六"
+                android:gravity="center"
+                android:textColor="#616161"
+                android:textSize="12sp"
+                android:textStyle="bold"/>
+        </LinearLayout>
+
+        <!-- 日历网格 -->
+        <GridView
+            android:id="@+id/calendar_grid"
+            android:layout_width="match_parent"
+            android:layout_height="268dp"
+            android:background="#FFFFFF"
+            android:columnWidth="@dimen/calendar_cell_size"
+            android:horizontalSpacing="1dp"
+            android:numColumns="7"
+            android:padding="1dp"
+            android:stretchMode="columnWidth"
+            android:verticalSpacing="1dp" />
+
+        <!-- 分隔线 -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#E0E0E0"/>
+
+        <!-- 日程列表标题 -->
         <TextView
-            android:id="@+id/lunar_date"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_height="53dp"
+            android:padding="16dp"
+            android:text="今日日程 (长按勾选)"
+            android:textColor="@android:color/black"
+            android:textSize="16sp"
+            android:textStyle="bold"/>
+
+        <!-- 日程列表 -->
+        <ListView
+            android:id="@+id/schedule_list"
+            android:layout_width="match_parent"
+            android:layout_height="170dp"
+            android:layout_weight="1"
+            android:divider="#E0E0E0"
+            android:dividerHeight="1dp"
+            android:paddingBottom="8dp"/>
+
+        <!-- 底部导航栏 -->
+        <com.google.android.material.bottomnavigation.BottomNavigationView
+            android:id="@+id/bottom_nav"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="@color/other_month_text"
-            android:textSize="14sp"
-            tools:text="农历: 二月初二" />
+            android:layout_gravity="bottom"
+            android:background="@android:color/white"
+            app:elevation="8dp"
+            app:itemIconTint="@drawable/nav_item_color"
+            app:itemTextColor="@drawable/nav_item_color"
+            app:labelVisibilityMode="labeled"
+            app:menu="@menu/bottom_nav_menu" />
     </LinearLayout>
-
-    <!-- 星期栏 -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:background="#F5F5F5"
-        android:paddingVertical="8dp">
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="日"
-            android:gravity="center"
-            android:textColor="#616161"
-            android:textStyle="bold"/>
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="一"
-            android:gravity="center"
-            android:textColor="#616161"
-            android:textStyle="bold"/>
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="二"
-            android:gravity="center"
-            android:textColor="#616161"
-            android:textStyle="bold"/>
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="三"
-            android:gravity="center"
-            android:textColor="#616161"
-            android:textStyle="bold"/>
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="四"
-            android:gravity="center"
-            android:textColor="#616161"
-            android:textStyle="bold"/>
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="五"
-            android:gravity="center"
-            android:textColor="#616161"
-            android:textStyle="bold"/>
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="六"
-            android:gravity="center"
-            android:textColor="#616161"
-            android:textStyle="bold"/>
-    </LinearLayout>
-
-    <!-- 日历网格 -->
-    <GridView
-        android:id="@+id/calendar_grid"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:numColumns="7"
-        android:verticalSpacing="1dp"
-        android:horizontalSpacing="1dp"
-        android:stretchMode="columnWidth"
-        android:gravity="center"
-        android:padding="8dp"
-        android:background="#FFFFFF"
-        android:layout_marginBottom="8dp"/>
-
-    <!-- 分隔线 -->
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="#E0E0E0"/>
-
-    <!-- 日程列表标题 -->
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="今日日程 (长按勾选)"
-        android:padding="16dp"
-        android:textSize="16sp"
-        android:textColor="@android:color/black"
-        android:textStyle="bold"/>
-
-    <!-- 日程列表 -->
-    <ListView
-        android:id="@+id/schedule_list"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:divider="#E0E0E0"
-        android:dividerHeight="1dp"
-        android:paddingBottom="8dp"/>
-
-    <!-- 底部导航栏 -->
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/bottom_nav"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        app:menu="@menu/bottom_nav_menu"
-        app:itemIconTint="@drawable/nav_item_color"
-        app:itemTextColor="@drawable/nav_item_color"
-        android:background="@android:color/white"
-        app:labelVisibilityMode="labeled"
-        app:elevation="8dp"/>
-</LinearLayout>
+</ScrollView>

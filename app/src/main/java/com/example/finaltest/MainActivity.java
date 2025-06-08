@@ -2,32 +2,44 @@ package com.example.finaltest;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
-import android.widget.CheckBox;
+
 import android.annotation.SuppressLint;
+import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
+import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
+import android.widget.CheckBox;
 import android.widget.GridView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.android.material.tabs.TabLayout;
+
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 
-    private TabLayout tabLayout;
+    // 视图组件
     private GridView calendarGridView;
     private ListView scheduleListView;
     private BottomNavigationView bottomNavigationView;
+    private TextView yearText, monthText, currentDateText;
+
+    // 数据
     private Calendar currentCalendar;
-    private List<CalendarDay> calendarDays = new ArrayList<>();
-    private List<ScheduleItem> scheduleItems = new ArrayList<>();
+    private final List<CalendarDay> calendarDays = new ArrayList<>();
+    private final List<ScheduleItem> scheduleItems = new ArrayList<>();
 
     @SuppressLint("MissingInflatedId")
     @Override
@@ -36,58 +48,82 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         // 初始化视图
-        tabLayout = findViewById(R.id.tab_layout);
+        initViews();
+
+        // 初始化数据
+        initData();
+
+        // 设置监听器
+        setupListeners();
+    }
+
+    private void initViews() {
         calendarGridView = findViewById(R.id.calendar_grid);
         scheduleListView = findViewById(R.id.schedule_list);
         bottomNavigationView = findViewById(R.id.bottom_nav);
-        TextView currentDateTextView = findViewById(R.id.current_date);
-        TextView lunarDateTextView = findViewById(R.id.lunar_date);
+        yearText = findViewById(R.id.year_text);
+        monthText = findViewById(R.id.month_text);
+        currentDateText = findViewById(R.id.current_date);
+    }
 
-        // 设置当前日期和农历（示例）
+    private void initData() {
         currentCalendar = Calendar.getInstance();
-        int month = currentCalendar.get(Calendar.MONTH) + 1;
-        int day = currentCalendar.get(Calendar.DAY_OF_MONTH);
-        currentDateTextView.setText(month + "月" + day + "日");
-        lunarDateTextView.setText("农历: 二月初二"); // 示例，实际应使用农历算法
 
-        // 初始化日历数据
+        // 初始化日历
         initCalendarData();
+        calendarGridView.setAdapter(new CalendarAdapter());
 
-        // 设置日历适配器
-        CalendarAdapter calendarAdapter = new CalendarAdapter();
-        calendarGridView.setAdapter(calendarAdapter);
+        // 初始化日程
+        initScheduleData();
+        scheduleListView.setAdapter(new ScheduleAdapter());
 
-        // 设置日历项点击事件
-        calendarGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                CalendarDay day = calendarDays.get(position);
-                if (day.isCurrentMonth) {
-                    Toast.makeText(MainActivity.this, "选择日期: " + day.year + "-" + day.month + "-" + day.day, Toast.LENGTH_SHORT).show();
-                    // 更新日程列表
-                    updateScheduleList(day.year, day.month, day.day);
-                }
+        // 更新标题显示
+        updateCalendarTitle();
+    }
+
+    private void setupListeners() {
+        // 年份切换
+        findViewById(R.id.btn_prev_year).setOnClickListener(v -> {
+            currentCalendar.add(Calendar.YEAR, -1);
+            refreshCalendar();
+        });
+
+        findViewById(R.id.btn_next_year).setOnClickListener(v -> {
+            currentCalendar.add(Calendar.YEAR, 1);
+            refreshCalendar();
+        });
+
+        // 月份切换
+        findViewById(R.id.btn_prev_month).setOnClickListener(v -> {
+            currentCalendar.add(Calendar.MONTH, -1);
+            refreshCalendar();
+        });
+
+        findViewById(R.id.btn_next_month).setOnClickListener(v -> {
+            currentCalendar.add(Calendar.MONTH, 1);
+            refreshCalendar();
+        });
+
+        // 日历项点击
+        calendarGridView.setOnItemClickListener((parent, view, position, id) -> {
+            CalendarDay day = calendarDays.get(position);
+            if (day.isCurrentMonth) {
+                showDateSelection(day);
+                updateScheduleList(day.year, day.month, day.day);
             }
         });
 
-        // 初始化日程数据
-        initScheduleData();
-
-        // 设置日程适配器
-        ScheduleAdapter scheduleAdapter = new ScheduleAdapter();
-        scheduleListView.setAdapter(scheduleAdapter);
-
-        // 设置底部导航栏事件
+        // 底部导航
         bottomNavigationView.setOnNavigationItemSelectedListener(item -> {
             int itemId = item.getItemId();
             if (itemId == R.id.home) {
-                Toast.makeText(this, "主页", Toast.LENGTH_SHORT).show();
+                // 已在主页
                 return true;
             } else if (itemId == R.id.schedule) {
                 Toast.makeText(this, "日程", Toast.LENGTH_SHORT).show();
                 return true;
             } else if (itemId == R.id.course) {
-                Toast.makeText(this, "课程表", Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(this, CourseScheduleActivity.class));
                 return true;
             } else if (itemId == R.id.settings) {
                 Toast.makeText(this, "设置", Toast.LENGTH_SHORT).show();
@@ -97,69 +133,89 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    // 初始化日历数据
-    private void initCalendarData() {
-        calendarDays.clear();
+    private void refreshCalendar() {
+        initCalendarData();
+        ((BaseAdapter) calendarGridView.getAdapter()).notifyDataSetChanged();
+        updateCalendarTitle();
+    }
 
-        // 获取当月第一天是星期几
-        Calendar calendar = (Calendar) currentCalendar.clone();
-        calendar.set(Calendar.DAY_OF_MONTH, 1);
-        int firstDayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
+    private void updateCalendarTitle() {
+        try {
+            // 更新年份
+            yearText.setText(new SimpleDateFormat("yyyy年", Locale.getDefault())
+                    .format(currentCalendar.getTime()));
 
-        // 获取当月总天数
-        int daysInMonth = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+            // 更新月份
+            monthText.setText(new SimpleDateFormat("M月", Locale.getDefault())
+                    .format(currentCalendar.getTime()));
 
-        // 计算上个月需要显示的天数
-        int prevMonthDays = firstDayOfWeek - Calendar.SUNDAY;
-
-        // 获取上个月的最后几天
-        Calendar prevCalendar = (Calendar) calendar.clone();
-        prevCalendar.add(Calendar.MONTH, -1);
-        int prevMonthLastDay = prevCalendar.getActualMaximum(Calendar.DAY_OF_MONTH);
-
-        // 添加上个月的最后几天
-        for (int i = prevMonthDays; i > 0; i--) {
-            calendarDays.add(new CalendarDay(
-                    prevCalendar.get(Calendar.YEAR),
-                    prevCalendar.get(Calendar.MONTH) + 1,
-                    prevMonthLastDay - i + 1,
-                    false,
-                    false
-            ));
-        }
-
-        // 添加当月的天数
-        for (int i = 1; i <= daysInMonth; i++) {
-            boolean isToday = (i == currentCalendar.get(Calendar.DAY_OF_MONTH) &&
-                    calendar.get(Calendar.MONTH) == currentCalendar.get(Calendar.MONTH) &&
-                    calendar.get(Calendar.YEAR) == currentCalendar.get(Calendar.YEAR));
-
-            calendarDays.add(new CalendarDay(
-                    calendar.get(Calendar.YEAR),
-                    calendar.get(Calendar.MONTH) + 1,
-                    i,
-                    true,
-                    isToday
-            ));
-        }
-
-        // 添加下个月的开始几天，使网格填满
-        int nextMonthDays = 42 - (prevMonthDays + daysInMonth);
-        Calendar nextCalendar = (Calendar) calendar.clone();
-        nextCalendar.add(Calendar.MONTH, 1);
-
-        for (int i = 1; i <= nextMonthDays; i++) {
-            calendarDays.add(new CalendarDay(
-                    nextCalendar.get(Calendar.YEAR),
-                    nextCalendar.get(Calendar.MONTH) + 1,
-                    i,
-                    false,
-                    false
-            ));
+            // 更新当前日期
+            currentDateText.setText(new SimpleDateFormat("M月d日 E", Locale.getDefault())
+                    .format(Calendar.getInstance().getTime()));
+        } catch (Exception e) {
+            Log.e("MainActivity", "日期格式化错误", e);
         }
     }
 
-    // 初始化日程数据
+    private void showDateSelection(CalendarDay day) {
+        Toast.makeText(this,
+                String.format(Locale.getDefault(),
+                        "选择日期: %d-%02d-%02d",
+                        day.year, day.month, day.day),
+                Toast.LENGTH_SHORT).show();
+    }
+
+    private void initCalendarData() {
+        calendarDays.clear();
+
+        Calendar calendar = (Calendar) currentCalendar.clone();
+        calendar.set(Calendar.DAY_OF_MONTH, 1);
+        int firstDayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
+        int prevMonthDays = firstDayOfWeek - Calendar.SUNDAY;
+
+        // 添加上月日期
+        Calendar prevMonth = (Calendar) calendar.clone();
+        prevMonth.add(Calendar.MONTH, -1);
+        int prevMonthMaxDay = prevMonth.getActualMaximum(Calendar.DAY_OF_MONTH);
+        for (int i = prevMonthDays; i > 0; i--) {
+            addCalendarDay(prevMonth, prevMonthMaxDay - i + 1, false);
+        }
+
+        // 添加本月日期
+        int currentMonthMaxDay = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+        Calendar today = Calendar.getInstance();
+        for (int i = 1; i <= currentMonthMaxDay; i++) {
+            boolean isToday = isSameDay(calendar, today, i);
+            addCalendarDay(calendar, i, true, isToday);
+        }
+
+        // 添加下月日期
+        int remainingCells = 42 - (prevMonthDays + currentMonthMaxDay);
+        for (int i = 1; i <= remainingCells; i++) {
+            addCalendarDay(calendar, i, false);
+        }
+    }
+
+    private void addCalendarDay(Calendar calendar, int day, boolean isCurrentMonth) {
+        addCalendarDay(calendar, day, isCurrentMonth, false);
+    }
+
+    private void addCalendarDay(Calendar calendar, int day, boolean isCurrentMonth, boolean isToday) {
+        calendarDays.add(new CalendarDay(
+                calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH) + 1,
+                day,
+                isCurrentMonth,
+                isToday
+        ));
+    }
+
+    private boolean isSameDay(Calendar cal1, Calendar cal2, int day) {
+        return cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
+                cal1.get(Calendar.MONTH) == cal2.get(Calendar.MONTH) &&
+                day == cal2.get(Calendar.DAY_OF_MONTH);
+    }
+
     private void initScheduleData() {
         scheduleItems.clear();
         scheduleItems.add(new ScheduleItem("新活动", "16:14 - 21:00", false));
@@ -168,75 +224,55 @@ public class MainActivity extends AppCompatActivity {
         scheduleItems.add(new ScheduleItem("学习", "全天", false));
     }
 
-    // 更新日程列表
     private void updateScheduleList(int year, int month, int day) {
-        // 根据选择的日期更新日程列表
-        // 这里只是示例，实际应用中应该从数据库或其他数据源获取数据
         initScheduleData();
-        ScheduleAdapter adapter = (ScheduleAdapter) scheduleListView.getAdapter();
-        adapter.notifyDataSetChanged();
+        ((BaseAdapter) scheduleListView.getAdapter()).notifyDataSetChanged();
     }
 
-    // 日历项数据类
+    // 数据类
     private static class CalendarDay {
-        int year;
-        int month;
-        int day;
-        boolean isCurrentMonth;
-        boolean isToday;
+        final int year;
+        final int month;
+        final int day;
+        final boolean isCurrentMonth;
+        final boolean isToday;
 
-        public CalendarDay(int year, int month, int day, boolean isCurrentMonth, boolean isToday) {
+        CalendarDay(int year, int month, int day, boolean isCurrentMonth, boolean isToday) {
             this.year = year;
             this.month = month;
             this.day = day;
             this.isCurrentMonth = isCurrentMonth;
             this.isToday = isToday;
         }
+
+        String getDateString() {
+            return String.format(Locale.getDefault(), "%d-%02d-%02d", year, month, day);
+        }
     }
 
-    // 日程项数据类
     private static class ScheduleItem {
-        String title;
-        String time;
+        final String title;
+        final String time;
         boolean isChecked;
 
-        public ScheduleItem(String title, String time, boolean isChecked) {
+        ScheduleItem(String title, String time, boolean isChecked) {
             this.title = title;
             this.time = time;
             this.isChecked = isChecked;
         }
     }
 
-    // 日历适配器
+    // 适配器类
     private class CalendarAdapter extends BaseAdapter {
-
-        @Override
-        public int getCount() {
-            return calendarDays.size();
-        }
-
-        @Override
-        public Object getItem(int position) {
-            return calendarDays.get(position);
-        }
-
-        @Override
-        public long getItemId(int position) {
-            return position;
-        }
-
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             TextView textView;
             if (convertView == null) {
                 textView = new TextView(MainActivity.this);
-                textView.setLayoutParams(new GridView.LayoutParams(
-                        ViewGroup.LayoutParams.MATCH_PARENT,
-                        120
-                ));
-                textView.setPadding(8, 8, 8, 8);
-                textView.setTextSize(16);
-                textView.setGravity(android.view.Gravity.CENTER);
+                int cellSize = getResources().getDimensionPixelSize(R.dimen.calendar_cell_size);
+                textView.setLayoutParams(new GridView.LayoutParams(cellSize, cellSize));
+                textView.setGravity(Gravity.CENTER);
+                textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
             } else {
                 textView = (TextView) convertView;
             }
@@ -245,78 +281,68 @@ public class MainActivity extends AppCompatActivity {
             textView.setText(String.valueOf(day.day));
 
             if (day.isToday) {
-                // 当前日期使用特殊背景和文字颜色
-                textView.setBackgroundColor(ContextCompat.getColor(MainActivity.this, R.color.today_background));
+                textView.setBackgroundResource(R.drawable.bg_today);
                 textView.setTextColor(ContextCompat.getColor(MainActivity.this, R.color.today_text));
             } else if (day.isCurrentMonth) {
-                // 当前月的日期使用默认样式
-                textView.setBackgroundColor(ContextCompat.getColor(MainActivity.this, R.color.current_month_background));
+                textView.setBackgroundColor(Color.TRANSPARENT);
                 textView.setTextColor(ContextCompat.getColor(MainActivity.this, R.color.current_month_text));
             } else {
-                // 不是当前月的日期使用淡色
-                textView.setBackgroundColor(ContextCompat.getColor(MainActivity.this, R.color.other_month_background));
+                textView.setBackgroundColor(Color.TRANSPARENT);
                 textView.setTextColor(ContextCompat.getColor(MainActivity.this, R.color.other_month_text));
             }
 
             return textView;
         }
+
+        @Override public int getCount() { return calendarDays.size(); }
+        @Override public Object getItem(int position) { return calendarDays.get(position); }
+        @Override public long getItemId(int position) { return position; }
     }
 
-    // 日程适配器
     private class ScheduleAdapter extends BaseAdapter {
-
-        @Override
-        public int getCount() {
-            return scheduleItems.size();
-        }
-
-        @Override
-        public Object getItem(int position) {
-            return scheduleItems.get(position);
-        }
-
-        @Override
-        public long getItemId(int position) {
-            return position;
-        }
-
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            ViewHolder holder;
-            if (convertView == null) {
-                convertView = getLayoutInflater().inflate(R.layout.schedule_item, parent, false);
-                holder = new ViewHolder();
-                holder.titleTextView = convertView.findViewById(R.id.title_text);
-                holder.timeTextView = convertView.findViewById(R.id.time_text);
-                holder.checkBox = convertView.findViewById(R.id.checkbox);
-                convertView.setTag(holder);
-            } else {
-                holder = (ViewHolder) convertView.getTag();
-            }
+            ViewHolder holder = getOrCreateViewHolder(convertView, parent);
+            bindScheduleItem(holder, position);
+            return holder.rootView;
+        }
 
+        private ViewHolder getOrCreateViewHolder(View convertView, ViewGroup parent) {
+            if (convertView == null) {
+                View view = getLayoutInflater().inflate(R.layout.schedule_item, parent, false);
+                ViewHolder holder = new ViewHolder();
+                holder.rootView = view;
+                holder.titleTextView = view.findViewById(R.id.title_text);
+                holder.timeTextView = view.findViewById(R.id.time_text);
+                holder.checkBox = view.findViewById(R.id.checkbox);
+                view.setTag(holder);
+                return holder;
+            }
+            return (ViewHolder) convertView.getTag();
+        }
+
+        private void bindScheduleItem(ViewHolder holder, int position) {
             ScheduleItem item = scheduleItems.get(position);
             holder.titleTextView.setText(item.title);
             holder.timeTextView.setText(item.time);
             holder.checkBox.setChecked(item.isChecked);
 
-            // 设置复选框点击事件
-            holder.checkBox.setOnClickListener(v -> {
-                item.isChecked = !item.isChecked;
-                // 可以在这里添加保存勾选状态的逻辑
-            });
+            holder.checkBox.setOnClickListener(v ->
+                    item.isChecked = !item.isChecked);
 
-            // 设置长按事件
-            convertView.setOnLongClickListener(v -> {
+            holder.rootView.setOnLongClickListener(v -> {
                 item.isChecked = !item.isChecked;
                 holder.checkBox.setChecked(item.isChecked);
-                // 可以在这里添加长按后的其他逻辑
                 return true;
             });
-
-            return convertView;
         }
 
+        @Override public int getCount() { return scheduleItems.size(); }
+        @Override public Object getItem(int position) { return scheduleItems.get(position); }
+        @Override public long getItemId(int position) { return position; }
+
         private class ViewHolder {
+            View rootView;
             TextView titleTextView;
             TextView timeTextView;
             CheckBox checkBox;
