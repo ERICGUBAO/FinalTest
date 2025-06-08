@@ -4,19 +4,21 @@ import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.Toast;
 import androidx.annotation.NonNull;
-import com.flask.colorpicker.ColorPickerView;
-import com.flask.colorpicker.builder.ColorPickerDialogBuilder;
+import android.app.AlertDialog;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.SeekBar;
 
 public class AddCourseDialog extends Dialog {
 
     public interface OnCourseAddedListener {
-        void onCourseAdded(String name, String teacher, String room, String time, int color);
+        void onCourseAdded(CourseItem courseItem);  // 修改为接收CourseItem对象
     }
 
     private final OnCourseAddedListener listener;
@@ -40,7 +42,6 @@ public class AddCourseDialog extends Dialog {
         Button colorButton = findViewById(R.id.button_color);
         Button saveButton = findViewById(R.id.button_save);
 
-        // 初始化下拉菜单
         ArrayAdapter<CharSequence> dayAdapter = ArrayAdapter.createFromResource(
                 getContext(), R.array.days_of_week, android.R.layout.simple_spinner_item);
         daySpinner.setAdapter(dayAdapter);
@@ -49,10 +50,8 @@ public class AddCourseDialog extends Dialog {
                 getContext(), R.array.class_times, android.R.layout.simple_spinner_item);
         timeSpinner.setAdapter(timeAdapter);
 
-        // 颜色选择
         colorButton.setOnClickListener(v -> showColorPicker());
 
-        // 保存课程
         saveButton.setOnClickListener(v -> {
             String name = nameEdit.getText().toString();
             String teacher = teacherEdit.getText().toString();
@@ -60,7 +59,8 @@ public class AddCourseDialog extends Dialog {
             String time = daySpinner.getSelectedItem() + " " + timeSpinner.getSelectedItem();
 
             if (!name.isEmpty()) {
-                listener.onCourseAdded(name, teacher, room, time, selectedColor);
+                CourseItem newCourse = new CourseItem(name, teacher, room, time, selectedColor);
+                listener.onCourseAdded(newCourse);  // 传递CourseItem对象
                 dismiss();
             } else {
                 Toast.makeText(getContext(), "请输入课程名称", Toast.LENGTH_SHORT).show();
@@ -69,18 +69,43 @@ public class AddCourseDialog extends Dialog {
     }
 
     private void showColorPicker() {
-        ColorPickerDialogBuilder
-                .with(getContext())
+        View colorPickerView = LayoutInflater.from(getContext()).inflate(R.layout.dialog_color_picker, null);
+        SeekBar redSeekBar = colorPickerView.findViewById(R.id.seekbar_red);
+        SeekBar greenSeekBar = colorPickerView.findViewById(R.id.seekbar_green);
+        SeekBar blueSeekBar = colorPickerView.findViewById(R.id.seekbar_blue);
+        View colorPreview = colorPickerView.findViewById(R.id.color_preview);
+
+        redSeekBar.setProgress(Color.red(selectedColor));
+        greenSeekBar.setProgress(Color.green(selectedColor));
+        blueSeekBar.setProgress(Color.blue(selectedColor));
+        colorPreview.setBackgroundColor(selectedColor);
+
+        SeekBar.OnSeekBarChangeListener colorChangeListener = new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                selectedColor = Color.rgb(
+                        redSeekBar.getProgress(),
+                        greenSeekBar.getProgress(),
+                        blueSeekBar.getProgress()
+                );
+                colorPreview.setBackgroundColor(selectedColor);
+            }
+
+            @Override public void onStartTrackingTouch(SeekBar seekBar) {}
+            @Override public void onStopTrackingTouch(SeekBar seekBar) {}
+        };
+
+        redSeekBar.setOnSeekBarChangeListener(colorChangeListener);
+        greenSeekBar.setOnSeekBarChangeListener(colorChangeListener);
+        blueSeekBar.setOnSeekBarChangeListener(colorChangeListener);
+
+        new AlertDialog.Builder(getContext())
                 .setTitle("选择课程颜色")
-                .initialColor(selectedColor)
-                .wheelType(ColorPickerView.WHEEL_TYPE.FLOWER)
-                .density(12)
-                .setPositiveButton("确定", (dialog, selectedColor, allColors) -> {
-                    this.selectedColor = selectedColor;
+                .setView(colorPickerView)
+                .setPositiveButton("确定", (dialog, which) -> {
                     findViewById(R.id.button_color).setBackgroundColor(selectedColor);
                 })
-                .setNegativeButton("取消", (dialog, which) -> {})
-                .build()
+                .setNegativeButton("取消", null)
                 .show();
     }
 }

@@ -120,13 +120,15 @@ public class MainActivity extends AppCompatActivity {
                 // 已在主页
                 return true;
             } else if (itemId == R.id.schedule) {
-                Toast.makeText(this, "日程", Toast.LENGTH_SHORT).show();
+                // 跳转到日程页面
+                startActivity(new Intent(this, ScheduleActivity.class));
                 return true;
             } else if (itemId == R.id.course) {
                 startActivity(new Intent(this, CourseScheduleActivity.class));
                 return true;
             } else if (itemId == R.id.settings) {
-                Toast.makeText(this, "设置", Toast.LENGTH_SHORT).show();
+                // 跳转到设置页面
+                startActivity(new Intent(this, SettingsActivity.class));
                 return true;
             }
             return false;

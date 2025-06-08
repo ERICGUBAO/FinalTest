@@ -1,68 +1,67 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/card_view"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="8dp"
-    android:background="?attr/selectableItemBackground"
-    android:orientation="vertical"
-    android:padding="16dp">
+    android:layout_margin="4dp"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="2dp"
+    app:cardUseCompatPadding="true">
 
-    <LinearLayout
-        android:layout_width="match_parent"
+<LinearLayout
+android:layout_width="match_parent"
+android:layout_height="wrap_content"
+android:orientation="vertical"
+android:padding="12dp">
+
+<TextView
+    android:id="@+id/course_name"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="课程名称"
+    android:textColor="#FFFFFF"
+    android:textSize="16sp"
+    android:textStyle="bold"/>
+
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:layout_marginTop="4dp">
+
+    <TextView
+        android:id="@+id/course_time"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:text="时间：周一 8:00-9:30"
+        android:textColor="#F0F0F0"
+        android:textSize="12sp"/>
 
-        <!-- 颜色指示器 -->
-        <View
-            android:id="@+id/color_indicator"
-            android:layout_width="4dp"
-            android:layout_height="24dp"
-            android:layout_marginEnd="12dp"/>
-
-        <!-- 课程名称和时间 -->
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/course_name"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textColor="@android:color/black"
-                android:textSize="16sp"
-                android:textStyle="bold"/>
-
-            <TextView
-                android:id="@+id/course_time"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:textColor="#616161"
-                android:textSize="14sp"/>
-        </LinearLayout>
-
-        <!-- 教室和教师 -->
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/course_teacher"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="#616161"
-                android:textSize="14sp"/>
-
-            <TextView
-                android:id="@+id/course_classroom"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:textColor="#616161"
-                android:textSize="14sp"/>
-        </LinearLayout>
-    </LinearLayout>
+    <TextView
+        android:id="@+id/course_classroom"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="教室：A101"
+        android:textColor="#F0F0F0"
+        android:textSize="12sp"
+        android:layout_marginStart="8dp"/>
 </LinearLayout>
+
+<TextView
+    android:id="@+id/course_teacher"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="教师：张老师"
+    android:textColor="#F0F0F0"
+    android:textSize="12sp"
+    android:layout_marginTop="4dp"/>
+
+<View
+    android:id="@+id/color_indicator"
+    android:layout_width="match_parent"
+    android:layout_height="2dp"
+    android:visibility="gone"/>
+</LinearLayout>
+    </androidx.cardview.widget.CardView>

@@ -14,4 +14,17 @@ public class CourseItem {
         this.time = time;
         this.color = color;
     }
+
+
+    // 可选：添加toString方法便于调试
+    @Override
+    public String toString() {
+        return "CourseItem{" +
+                "courseName='" + courseName + '\'' +
+                ", teacher='" + teacher + '\'' +
+                ", classroom='" + classroom + '\'' +
+                ", time='" + time + '\'' +
+                ", color=" + color +
+                '}';
+    }
 }

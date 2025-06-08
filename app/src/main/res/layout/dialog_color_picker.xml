@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <View
+        android:id="@+id/color_preview"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:layout_marginBottom="16dp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="红色"
+        android:textColor="#FF0000"/>
+
+    <SeekBar
+        android:id="@+id/seekbar_red"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:max="255"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="绿色"
+        android:textColor="#00FF00"/>
+
+    <SeekBar
+        android:id="@+id/seekbar_green"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:max="255"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="蓝色"
+        android:textColor="#0000FF"/>
+
+    <SeekBar
+        android:id="@+id/seekbar_blue"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:max="255"/>
+</LinearLayout>
