@@ -17,6 +17,7 @@ public class SettingsActivity extends AppCompatActivity {
     private Switch switchTheme;
     private Button btnClearCache;
     private SharedPreferences sharedPreferences;
+    private SharedPreferences coursePreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,7 +26,11 @@ public class SettingsActivity extends AppCompatActivity {
 
         switchTheme = findViewById(R.id.switch_theme);
         btnClearCache = findViewById(R.id.btn_clear_cache);
+
+        // 主题设置用的SharedPreferences
         sharedPreferences = getSharedPreferences("settings", MODE_PRIVATE);
+        // 课程数据用的SharedPreferences
+        coursePreferences = getSharedPreferences("CourseSchedulePrefs", MODE_PRIVATE);
 
         // 初始化主题开关状态
         boolean isDarkTheme = sharedPreferences.getBoolean("dark_theme", false);
@@ -40,12 +45,13 @@ public class SettingsActivity extends AppCompatActivity {
             editor.apply();
         });
 
-        // 清除缓存按钮点击事件
+        // 清除缓存按钮点击事件 - 修改为清除课程数据
         btnClearCache.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                clearCache();
-                Toast.makeText(SettingsActivity.this, "缓存已清除", Toast.LENGTH_SHORT).show();
+                clearCourseData();
+                clearAppCache();
+                Toast.makeText(SettingsActivity.this, "所有课程数据已清除", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -58,7 +64,15 @@ public class SettingsActivity extends AppCompatActivity {
         }
     }
 
-    private void clearCache() {
+    // 清除课程数据
+    private void clearCourseData() {
+        SharedPreferences.Editor editor = coursePreferences.edit();
+        editor.clear(); // 清除所有课程数据
+        editor.apply();
+    }
+
+    // 清除应用缓存（可选）
+    private void clearAppCache() {
         try {
             File cacheDir = getCacheDir();
             if (cacheDir != null && cacheDir.isDirectory()) {

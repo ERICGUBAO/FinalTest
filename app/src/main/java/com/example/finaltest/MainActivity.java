@@ -6,6 +6,7 @@ import androidx.core.content.ContextCompat;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
@@ -22,6 +23,10 @@ import android.widget.Toast;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -36,6 +41,8 @@ public class MainActivity extends AppCompatActivity {
     private Calendar currentCalendar;
     private final List<CalendarDay> calendarDays = new ArrayList<>();
     private final List<ScheduleItem> scheduleItems = new ArrayList<>();
+    private static final String PREFS_NAME = "SchedulePrefs";
+    private static final String SCHEDULE_LIST_KEY = "scheduleList";
 
     @SuppressLint("MissingInflatedId")
     @Override
@@ -61,9 +68,45 @@ public class MainActivity extends AppCompatActivity {
         currentCalendar = Calendar.getInstance();
         initCalendarData();
         calendarGridView.setAdapter(new CalendarAdapter());
-        initScheduleData();
-        scheduleListView.setAdapter(new MainScheduleAdapter());
+        loadScheduleData();
+        updateScheduleList(currentCalendar.get(Calendar.YEAR),
+                currentCalendar.get(Calendar.MONTH) + 1,
+                currentCalendar.get(Calendar.DAY_OF_MONTH));
         updateCalendarTitle();
+    }
+
+    private void loadScheduleData() {
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        String jsonString = prefs.getString(SCHEDULE_LIST_KEY, null);
+
+        if (jsonString == null) {
+            // 初始化一些示例数据
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+            String today = sdf.format(Calendar.getInstance().getTime());
+            scheduleItems.add(new ScheduleItem("示例会议", "09:00 - 10:30", today, false));
+            saveScheduleData();
+        }
+    }
+
+    private void saveScheduleData() {
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+
+        try {
+            JSONArray jsonArray = new JSONArray();
+            for (ScheduleItem item : scheduleItems) {
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("title", item.title);
+                jsonObject.put("time", item.time);
+                jsonObject.put("date", item.date);
+                jsonObject.put("isChecked", item.isChecked);
+                jsonArray.put(jsonObject);
+            }
+            editor.putString(SCHEDULE_LIST_KEY, jsonArray.toString());
+            editor.apply();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     private void setupListeners() {
@@ -170,39 +213,79 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void addCalendarDay(Calendar calendar, int day, boolean isCurrentMonth) {
-        addCalendarDay(calendar, day, isCurrentMonth, false);
-    }
-
-    private void addCalendarDay(Calendar calendar, int day, boolean isCurrentMonth, boolean isToday) {
-        calendarDays.add(new CalendarDay(
-                calendar.get(Calendar.YEAR),
-                calendar.get(Calendar.MONTH) + 1,
-                day,
-                isCurrentMonth,
-                isToday
-        ));
-    }
-
-    private boolean isSameDay(Calendar cal1, Calendar cal2, int day) {
-        return cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
-                cal1.get(Calendar.MONTH) == cal2.get(Calendar.MONTH) &&
-                day == cal2.get(Calendar.DAY_OF_MONTH);
-    }
-
-    private void initScheduleData() {
-        scheduleItems.clear();
-        scheduleItems.add(new ScheduleItem("新活动", "16:14 - 21:00", false));
-        scheduleItems.add(new ScheduleItem("会议", "全天", false));
-        scheduleItems.add(new ScheduleItem("项目讨论", "全天", false));
-        scheduleItems.add(new ScheduleItem("学习", "全天", false));
-    }
-
     private void updateScheduleList(int year, int month, int day) {
-        initScheduleData();
-        ((BaseAdapter) scheduleListView.getAdapter()).notifyDataSetChanged();
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        String jsonString = prefs.getString(SCHEDULE_LIST_KEY, null);
+        List<ScheduleItem> filteredItems = new ArrayList<>();
+
+        if (jsonString != null) {
+            try {
+                String selectedDate = String.format(Locale.getDefault(), "%04d-%02d-%02d", year, month, day);
+                JSONArray jsonArray = new JSONArray(jsonString);
+
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    JSONObject jsonObject = jsonArray.getJSONObject(i);
+                    if (jsonObject.getString("date").equals(selectedDate)) {
+                        filteredItems.add(new ScheduleItem(
+                                jsonObject.getString("title"),
+                                jsonObject.getString("time"),
+                                jsonObject.getString("date"),
+                                jsonObject.getBoolean("isChecked")
+                        ));
+                    }
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+
+        scheduleListView.setAdapter(new MainScheduleAdapter(filteredItems));
     }
 
+    // ... 保持其他辅助方法不变 ...
+
+    private class MainScheduleAdapter extends BaseAdapter {
+        private final List<ScheduleItem> items;
+
+        MainScheduleAdapter(List<ScheduleItem> items) {
+            this.items = items;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            if (convertView == null) {
+                convertView = LayoutInflater.from(MainActivity.this)
+                        .inflate(R.layout.schedule_item, parent, false);
+            }
+
+            ScheduleItem item = items.get(position);
+            TextView titleText = convertView.findViewById(R.id.title_text);
+            TextView timeText = convertView.findViewById(R.id.time_text);
+            TextView dateText = convertView.findViewById(R.id.date_text);
+
+            titleText.setText(item.title);
+            timeText.setText(item.time);
+            dateText.setText(formatDate(item.date));
+
+            return convertView;
+        }
+
+        private String formatDate(String dateStr) {
+            try {
+                SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+                SimpleDateFormat outputFormat = new SimpleDateFormat("yyyy年MM月dd日", Locale.getDefault());
+                return outputFormat.format(inputFormat.parse(dateStr));
+            } catch (Exception e) {
+                return dateStr;
+            }
+        }
+
+        @Override public int getCount() { return items.size(); }
+        @Override public Object getItem(int position) { return items.get(position); }
+        @Override public long getItemId(int position) { return position; }
+    }
+
+    // 新增：CalendarDay类（来自第二段代码）
     private static class CalendarDay {
         final int year;
         final int month;
@@ -219,6 +302,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    // 新增：CalendarAdapter类（来自第二段代码）
     private class CalendarAdapter extends BaseAdapter {
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
@@ -255,46 +339,25 @@ public class MainActivity extends AppCompatActivity {
         @Override public long getItemId(int position) { return position; }
     }
 
-    private class MainScheduleAdapter extends BaseAdapter {
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            if (convertView == null) {
-                // 使用三种方式之一获取LayoutInflater
-                // 方式1（推荐）：
-                convertView = LayoutInflater.from(MainActivity.this).inflate(R.layout.schedule_item, parent, false);
-
-                // 方式2：
-                // convertView = getLayoutInflater().inflate(R.layout.schedule_item, parent, false);
-
-                // 方式3：
-                // LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                // convertView = inflater.inflate(R.layout.schedule_item, parent, false);
-            }
-
-            ScheduleItem item = scheduleItems.get(position);
-            TextView titleText = convertView.findViewById(R.id.title_text);
-            TextView timeText = convertView.findViewById(R.id.time_text);
-
-            titleText.setText(item.title);
-            timeText.setText(item.time);
-
-            return convertView;
-        }
-
-        @Override public int getCount() { return scheduleItems.size(); }
-        @Override public Object getItem(int position) { return scheduleItems.get(position); }
-        @Override public long getItemId(int position) { return position; }
+    // 新增：addCalendarDay方法（来自第二段代码）
+    private void addCalendarDay(Calendar calendar, int day, boolean isCurrentMonth) {
+        addCalendarDay(calendar, day, isCurrentMonth, false);
     }
 
-    private static class ScheduleItem {
-        String title;
-        String time;
-        boolean completed;
+    private void addCalendarDay(Calendar calendar, int day, boolean isCurrentMonth, boolean isToday) {
+        calendarDays.add(new CalendarDay(
+                calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH) + 1,
+                day,
+                isCurrentMonth,
+                isToday
+        ));
+    }
 
-        ScheduleItem(String title, String time, boolean completed) {
-            this.title = title;
-            this.time = time;
-            this.completed = completed;
-        }
+    // 新增：isSameDay方法（来自第二段代码）
+    private boolean isSameDay(Calendar cal1, Calendar cal2, int day) {
+        return cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
+                cal1.get(Calendar.MONTH) == cal2.get(Calendar.MONTH) &&
+                day == cal2.get(Calendar.DAY_OF_MONTH);
     }
 }

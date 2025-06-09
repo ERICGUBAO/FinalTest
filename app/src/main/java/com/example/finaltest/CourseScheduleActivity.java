@@ -1,7 +1,6 @@
 package com.example.finaltest;
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
@@ -11,8 +10,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
+import androidx.appcompat.app.AlertDialog;
 
 public class CourseScheduleActivity extends AppCompatActivity {
 
@@ -31,14 +30,8 @@ public class CourseScheduleActivity extends AppCompatActivity {
         GridLayoutManager layoutManager = new GridLayoutManager(this, 8);
         recyclerView.setLayoutManager(layoutManager);
 
-        // 从保存的状态恢复课程（实际应用中应使用数据库）
-        if (savedInstanceState != null) {
-            courseItems = savedInstanceState.getParcelableArrayList("courseItems");
-        }
-
-        if (courseItems == null || courseItems.isEmpty()) {
-            initCourseData();
-        }
+        // 从SharedPreferences加载课程数据
+        courseItems = CourseDataManager.loadCourses(this);
 
         sortCourseItems();
         adapter = new CourseScheduleAdapter(courseItems, this);
@@ -49,13 +42,10 @@ public class CourseScheduleActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putParcelableArrayList("courseItems", new ArrayList<>(courseItems));
-    }
-
-    private void initCourseData() {
-
+    protected void onPause() {
+        super.onPause();
+        // 保存课程数据
+        CourseDataManager.saveCourses(this, courseItems);
     }
 
     private void showAddCourseDialog() {
@@ -63,6 +53,8 @@ public class CourseScheduleActivity extends AppCompatActivity {
             courseItems.add(newCourse);
             sortCourseItems();
             adapter.notifyDataSetChanged();
+            // 保存课程数据
+            CourseDataManager.saveCourses(this, courseItems);
         });
         dialog.show();
     }

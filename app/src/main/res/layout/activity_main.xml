@@ -183,7 +183,7 @@
         <GridView
             android:id="@+id/calendar_grid"
             android:layout_width="match_parent"
-            android:layout_height="268dp"
+            android:layout_height="285dp"
             android:background="#FFFFFF"
             android:columnWidth="@dimen/calendar_cell_size"
             android:horizontalSpacing="1dp"
@@ -203,7 +203,7 @@
             android:layout_width="match_parent"
             android:layout_height="53dp"
             android:padding="16dp"
-            android:text="今日日程 (长按勾选)"
+            android:text="今日日程"
             android:textColor="@android:color/black"
             android:textSize="16sp"
             android:textStyle="bold"/>

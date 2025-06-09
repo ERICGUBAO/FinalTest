@@ -1,7 +1,11 @@
+// CourseItem.java
 package com.example.finaltest;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class CourseItem implements Parcelable {
     public String courseName;
@@ -24,6 +28,39 @@ public class CourseItem implements Parcelable {
         classroom = in.readString();
         time = in.readString();
         color = in.readInt();
+    }
+
+    // 将CourseItem转换为JSON字符串
+    public String toJson() {
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("courseName", courseName);
+            jsonObject.put("teacher", teacher);
+            jsonObject.put("classroom", classroom);
+            jsonObject.put("time", time);
+            jsonObject.put("color", color);
+            return jsonObject.toString();
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return "";
+        }
+    }
+
+    // 从JSON字符串创建CourseItem
+    public static CourseItem fromJson(String jsonStr) {
+        try {
+            JSONObject jsonObject = new JSONObject(jsonStr);
+            return new CourseItem(
+                    jsonObject.getString("courseName"),
+                    jsonObject.getString("teacher"),
+                    jsonObject.getString("classroom"),
+                    jsonObject.getString("time"),
+                    jsonObject.getInt("color")
+            );
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     public static final Creator<CourseItem> CREATOR = new Creator<CourseItem>() {
